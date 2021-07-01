@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Usuários</title>
+    <hr>
+    
+    <h4>Lista de usuários</h4>
+    
+    <!--<button type="button" class="btn btn-primary m-2" onclick="listaUsers()">Atualzar Usuários</button>-->
+    
+    <br>
+    
+    <ul id="users"></ul>
+    
+    <hr>
+    <h4>Novo usuario</h4>
+    <input type="text" name="email" id="email" placeholder="Email"><br>
+    <input type="text" name="password" id="password" placeholder="Senha"><br>
+  
+    <button type="button" class="btn btn-primary m-2" onclick="createUser()">Cadastrar Usuário</button>
+    <hr>
+
+
+    <h4>Editar usuario</h4>
+    <input type="text" name="idEdit" id="idEdit" placeholder="ID" readonly><br>
+    <input type="text" name="emailEdit" id="emailEdit" placeholder="Email"><br>
+    <input type="text" name="passwordEdit" id="passwordEdit" placeholder="Senha"><br>
+    <button type="button" class="btn btn-primary m-2" onclick="updateUser()">Alterar Usuário</button>
+
+
+    <link rel="stylesheet" href="./public/css/bootstrap.min.css">
+
+</head>
+<body>
+
+
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+
+   listaUsers();
+
+
+    
+   function listaUsers(){
+
+    
+
+    axios.get("http://localhost:3000/users").then(response => {
+        
+        var users = response.data;
+
+        var list = document.getElementById("users");
+
+       
+
+        users.forEach(user => {
+            var item = document.createElement("li");
+
+            item.setAttribute("data-id",user.id);
+            item.setAttribute("data-email",user.email);
+            item.setAttribute("data-password",user.password);
+ 
+            item.innerHTML = user.id + " - " + user.email + " - " + user.password;
+
+            var deleteBtn = document.createElement("button");
+            deleteBtn.innerHTML = "Deletar";
+            deleteBtn.addEventListener("click",function(){
+                deleteUser(item)
+            })
+
+            var editBtn = document.createElement("button");
+            editBtn.innerHTML = "Editar";
+            editBtn.addEventListener("click",function(){
+                loadForm(item);
+            });
+
+
+            item.appendChild(deleteBtn);
+            item.appendChild(editBtn);
+
+            list.appendChild(item);
+        });
+
+    }).catch(error => {
+        console.log(error);
+    });
+}
+
+
+    function createUser(){
+        var emailInput = document.getElementById("email");
+        var passwordInput = document.getElementById("password");
+        
+        var user = {
+            email: emailInput.value,
+            password: passwordInput.value
+       
+        }
+
+        axios.post("http://localhost:3000/users/create",user).then(response => {
+            if(response.status == 200){
+                alert("Usuario cadastrado!")
+            }
+        }).catch(err => {
+            console.log(err);
+        });
+    }
+
+
+
+    function loadForm(listItem){
+        var id = listItem.getAttribute("data-id");
+        var email = listItem.getAttribute("data-email");
+        var password = listItem.getAttribute("data-password");
+        
+        document.getElementById("idEdit").value = id;
+        document.getElementById("emailEdit").value = email;
+        document.getElementById("passwordEdit").value = password;
+        
+    }
+
+
+    
+
+    function updateUser(){
+
+        var idInput = document.getElementById("idEdit")
+        var emailInput = document.getElementById("emailEdit");
+        var passwordInput = document.getElementById("passwordEdit");
+        
+
+        var user = {
+            id:  idInput.value,
+            email: emailInput.value,
+            password: passwordInput.value
+            
+        }
+
+        
+
+        axios.post("http://localhost:3000/users/update",user).then(response => {
+            if(response.status == 200){
+                alert("Usuario atualizado!!")
+            }
+        }).catch(err => {
+            console.log(err);
+        });
+
+    }
+
+
+    
+    function deleteUser(listItem){
+        var id = listItem.getAttribute("data-id");
+        axios.delete("http://localhost:3000/users/delete/"+id).then(response => {
+            alert("Usuario deletado!")
+        }).catch(err => {
+            console.log(err);
+        });
+    }
+
+
+
+
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="/js/bootstrap.min.js"></script>
+
+</html>
